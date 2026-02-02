@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aapla Boka | Fergusson College Tribute</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --fc-maroon: #800000;
+            --soft-cream: #FDFBF7;
+            --text-gray: #333;
+            --sage-green: #5a6d5a;
+            --white: #FFFFFF;
+            --light-gray: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--soft-cream);
+            color: var(--text-gray);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container { padding: 0 20px; max-width: 1000px; margin: 0 auto; }
+
+        /* HEADER */
+        header {
+            background: var(--white);
+            padding: 50px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .marathi-title {
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: 2.8rem;
+            color: var(--fc-maroon);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* SECTION HEADERS with VIEW ALL */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin: 40px 0 15px;
+        }
+
+        .section-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title-marathi {
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: 1.8rem;
+            color: var(--fc-maroon);
+            line-height: 1.2;
+        }
+
+        .view-all-link {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--sage-green);
+            text-decoration: none;
+            border-bottom: 1px solid var(--sage-green);
+            padding-bottom: 2px;
+            transition: 0.3s;
+        }
+
+        .view-all-link:hover {
+            color: var(--fc-maroon);
+            border-color: var(--fc-maroon);
+        }
+
+        /* HORIZONTAL SCROLLING CAROUSEL */
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 10px 0 30px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+
+        /* STORY CARDS - UPDATED FOR IMAGES */
+        .story-card {
+            flex: 0 0 85%;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            scroll-snap-align: center;
+            border-left: 6px solid var(--fc-maroon);
+            overflow: hidden; /* Important to clip the top image */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .story-img-top {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid #eee;
+        }
+
+        .story-content {
+            padding: 25px;
+        }
+
+        .story-card p {
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        .author-tag {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--sage-green);
+        }
+
+        /* GALLERY ITEMS */
+        .gallery-item {
+            flex: 0 0 75%;
+            scroll-snap-align: center;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* CALL TO ACTION */
+        .cta-section {
+            background: var(--fc-maroon);
+            color: white;
+            padding: 50px 25px;
+            border-radius: 25px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--fc-maroon);
+            padding: 16px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* PRIVACY & ETHICS */
+        .privacy-box {
+            font-size: 0.9rem;
+            background: #fff;
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--light-gray);
+            margin-bottom: 50px;
+        }
+
+        .ethics-highlight {
+            display: block;
+            color: var(--fc-maroon);
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            text-align: center;
+            border: 2px dashed var(--fc-maroon);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        footer { text-align: center; padding: 40px; color: #999; font-size: 0.8rem; border-top: 1px solid #eee; }
+
+        /* DESKTOP VIEW */
+        @media (min-width: 768px) {
+            .story-card { flex: 0 0 40%; }
+            .gallery-item { flex: 0 0 30%; }
+            .marathi-title { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="marathi-title">आपला बोका</span>
+        <p class="tagline">The Silent Guardian of Fergusson College</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="section-header">
+            <div class="section-title-group">
+                <h2 class="section-title-marathi">आठवणी</h2>
+                <span style="font-size: 0.8rem; color: #999;">Memories</span>
+            </div>
+            <a href="stories.html" class="view-all-link">View All Stories</a>
+        </div>
+        
+        <div class="horizontal-scroll">
+            <div class="story-card">
+                <img src="C:\SData\Projects\FC_BOKA_Stories\Images\boka_riskshaw.jpg" class="story-image" alt="boka_riskshaw">
+                <div class="story-content">
+                    <p>"It was a quiet afternoon, and as I walked toward the gate, I saw Boka standing all alone in front of a parked rickshaw. There was nobody else around, and he was just standing there perfectly still, looking very serious. Where was he planning to go to? Visit his friends in egypt?"</p>
+                    <span class="author-tag">— Science Student, Batch of 2027</span>
+                </div>
+            </div>
+
+            <div class="story-card">
+                <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600" class="story-img-top" alt="Boka Memory">
+                <div class="story-content">
+                    <p>"I once found him sleeping on my notes. I didn't have the heart to move him, so I just didn't study that day. Best excuse ever."</p>
+                    <span class="author-tag">— Science Dept</span>
+                </div>
+            </div>
+
+            <div class="story-card">
+                <div class="story-content">
+                    <p>"His presence near the amphitheatre during Firodiya practice was always the best stress-buster."</p>
+                    <span class="author-tag">— Class of 2019</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <div class="section-title-group">
+                <h2 class="section-title-marathi">चित्रशाळा</h2>
+                <span style="font-size: 0.8rem; color: #999;">Gallery</span>
+            </div>
+            <a href="gallery.html" class="view-all-link">View All Photos</a>
+        </div>
+
+        <div class="horizontal-scroll">
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600" alt="Boka resting">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600" alt="Boka near the building">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=600" alt="Boka in the sun">
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2 class="section-title-marathi" style="color: white; margin-bottom: 10px;">तुमची गोष्ट सांगा</h2>
+            <p>Help us preserve the memories of our favorite senior.</p>
+            <a href="https://forms.gle/ZLr8re4SYEvGXYw56" class="btn">Submit Story/Photo</a>
+        </div>
+
+        <div class="privacy-box">
+            <h3 style="font-family: 'Noto Serif Devanagari'; color: var(--fc-maroon);">महत्वाची सूचना (Important Note)</h3>
+            <p style="margin-top: 10px;">This archive celebrates Boka’s legacy and the joy they brought to our campus. If you would like any image or story removed, please contact us at xyz@gmail.com and we will honor your request promptly.</p>
+            
+            <span class="ethics-highlight">
+                PLEASE DO NOT DISTURB BOKA FOR PHOTOS. 
+                <br>Respect his space, his sleep, and his freedom.
+            </span>
+        </div>
+
+    </div>
+
+    <footer>
+        <p><a href="privacy.html" style="color: #999;">Privacy Policy</a></p>
+        <p>&copy; 2026 The Fergusson College Community</p><br><p>A non-commercial student tribute.</p>
+    </footer>
+
+</body>
+</html>
