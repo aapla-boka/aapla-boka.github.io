@@ -11,7 +11,37 @@
         .back-link { display: inline-block; margin-bottom: 20px; color: #800000; text-decoration: none; font-weight: bold; }
         h1 { font-family: 'Noto Serif Devanagari', serif; color: #800000; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
-        .grid img { width: 100%; height: 250px; object-fit: cover; border-radius: 10px; }
+        .grid img { width: 100%; height: 250px; object-fit: cover; border-radius: 10px; cursor: pointer; transition: transform 0.2s; }
+        .grid img:hover { transform: scale(1.02); }
+
+        /* Styles for the Fullscreen Overlay */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        .fullscreen img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .fullscreen p {
+            color: white;
+            margin-bottom: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -19,27 +49,57 @@
         <a href="index.html" class="back-link">&larr; Back Home</a>
         <h1>चित्रशाळा (Gallery)</h1>
         <div class="grid">
-            <img src="photos/boka_sitting.jpg" alt="boka sitting">
-            <img src="photos/boka_lisa.jpg" alt="boka lisa">
-            <img src="photos/boka_eating.jpg" alt="boka eating">
-            <img src="photos/boka.jpg" alt="boka">
-            <img src="photos/boka eating1.jpg" alt="boka eat1">
-            <img src="photos/boka eating2.jpg" alt="boka eat2">
-            <img src="photos/boka goodboy.jpg" alt="boka goodboy">
-            <img src="photos/boka large.jpg" alt="boka large">
-            <img src="photos/boka sleep1.jpg" alt="boka sleep1">
-            <img src="photos/boka sleep2.jpg" alt="boka sleep2">
-            <img src="photos/boka sleep3.jpg" alt="boka sleep3">
-            <img src="photos/boka sleep4.jpg" alt="boka tree">
-            <img src="photos/boka standing.jpg" alt="boka stand">
-            <img src="photos/boka yoga.jpg" alt="boka yoga">
-            </div>
+            <img src="photos/boka_sitting.jpg" alt="boka sitting" onclick="fullscreen(event)">
+            <img src="photos/boka back.jpg" alt="boka back" onclick="fullscreen(event)">
+            <img src="photos/boka sit4.jpg" alt="boka sit 4" onclick="fullscreen(event)">
+            <img src="photos/boka stand 3.jpg" alt="boka stand3" onclick="fullscreen(event)">
+            <img src="photos/boka stand4.png" alt="boka stand4" onclick="fullscreen(event)">
+            <img src="photos/boka_lisa.jpg" alt="boka lisa" onclick="fullscreen(event)">
+            <img src="photos/boka_eating.jpg" alt="boka eating" onclick="fullscreen(event)">
+            <img src="photos/boka.jpg" alt="boka" onclick="fullscreen(event)">
+            <img src="photos/boka eating1.jpg" alt="boka eat1" onclick="fullscreen(event)">
+            <img src="photos/boka eating2.jpg" alt="boka eat2" onclick="fullscreen(event)">
+            <img src="photos/boka goodboy.jpg" alt="boka goodboy" onclick="fullscreen(event)">
+            <img src="photos/boka large.jpg" alt="boka large" onclick="fullscreen(event)">
+            <img src="photos/boka sleep1.jpg" alt="boka sleep1" onclick="fullscreen(event)">
+            <img src="photos/boka sleep2.jpg" alt="boka sleep2" onclick="fullscreen(event)">
+            <img src="photos/boka sleep3.jpg" alt="boka sleep3" onclick="fullscreen(event)">
+            <img src="photos/boka sleep4.jpg" alt="boka tree" onclick="fullscreen(event)">
+            <img src="photos/boka standing.jpg" alt="boka stand" onclick="fullscreen(event)">
+            <img src="photos/boka yoga.jpg" alt="boka yoga" onclick="fullscreen(event)">
+        </div>
     </div>
+
+    <script>
+        // fullscreen an image for the user.
+        window.fullscreen = (event) => {
+          // create an overlay that covers the entire screen.
+          const overlay = document.createElement('div')
+          overlay.classList.add('fullscreen')
+
+          // get the image and caption it with its `alt`.
+          const caption = document.createElement('p')
+          caption.innerHTML = event.target.alt
+          const image = document.createElement('img')
+          image.src = event.target.src; image.alt = event.target.alt
+
+          // display the caption above the image, on top of the overlay.
+          overlay.appendChild(caption); overlay.appendChild(image)
+          document.body.appendChild(overlay)
+
+          // if the user clicks anywhere on the overlay, dismiss it.
+          overlay.addEventListener('click', () => {
+            overlay.remove()
+          })
+
+          // if the user presses the escape key, dismiss the overlay.
+          document.addEventListener('keydown', function escListener(event) {
+            if (event.key == 'Escape') {
+              overlay.remove()
+              document.removeEventListener('keydown', escListener)
+            }
+          })
+        }
+    </script>
 </body>
-
 </html>
-
-
-
-
-
