@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐾 Aapla Boka | Fergusson College </title>
+    <title>🐾 Aapla Boka</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
@@ -29,6 +29,7 @@
 
         .container { padding: 0 20px; max-width: 1000px; margin: 0 auto; }
 
+        /* HEADER & NEW ELEMENTS */
         header {
             background: var(--white);
             padding: 50px 20px;
@@ -53,6 +54,53 @@
             color: var(--text-gray);
         }
 
+        .boka-status {
+            display: inline-block;
+            background: #f8f8f8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 15px;
+            border: 1px solid #eee;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; }
+        }
+
+        .share-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: 1.5px solid var(--fc-maroon);
+            color: var(--fc-maroon);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .share-btn:hover {
+            background: var(--fc-maroon);
+            color: white;
+        }
+
+        /* SECTION HEADERS */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -87,6 +135,7 @@
             border-color: var(--fc-maroon);
         }
 
+        /* FADED SCROLL EFFECT */
         .horizontal-scroll {
             display: flex;
             overflow-x: auto;
@@ -94,10 +143,14 @@
             padding: 10px 0 30px;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
+            /* Creates the fade out effect on the right */
+            mask-image: linear-gradient(to right, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
         }
 
         .horizontal-scroll::-webkit-scrollbar { display: none; }
 
+        /* STORY CARDS */
         .story-card {
             flex: 0 0 85%;
             background: var(--white);
@@ -124,20 +177,19 @@
             padding: 25px;
         }
 
-        /* READ MORE LOGIC */
         .story-text {
             font-size: 1.05rem;
             margin-bottom: 10px;
             color: #444;
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* Show only 3 lines */
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
         .story-text.expanded {
-            -webkit-line-clamp: unset; /* Show all lines */
+            -webkit-line-clamp: unset;
             overflow: visible;
         }
 
@@ -161,6 +213,7 @@
             display: block;
         }
 
+        /* GALLERY ITEMS */
         .gallery-item {
             flex: 0 0 75%;
             scroll-snap-align: center;
@@ -179,6 +232,7 @@
 
         .gallery-item img:hover { transform: scale(1.02); }
 
+        /* FULLSCREEN */
         .fullscreen {
             position: fixed;
             top: 0;
@@ -198,6 +252,7 @@
             border-radius: 5px;
         }
 
+        /* FOOTER & CTA */
         .cta-section {
             background: var(--fc-maroon);
             color: white;
@@ -254,6 +309,16 @@
     <header>
         <span class="marathi-title">आपला बोका</span>
         <p class="tagline">The Silent Guardian of Fergusson College</p>
+        
+        <div class="boka-status">
+            <span class="status-dot"></span> 
+            Last Spotted: Near Main Gate
+        </div>
+        <br>
+        <button id="shareBtn" class="share-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y1="15"></line></svg>
+            Share Website
+        </button>
     </header>
 
     <div class="container">
@@ -382,6 +447,22 @@
                 btn.innerText = "Read Less";
             }
         }
+
+        // Share Button Logic
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Aapla Boka | Fergusson College',
+                        text: 'A tribute to the silent guardian of Fergusson College.',
+                        url: window.location.href
+                    });
+                } catch (err) { console.log('Share cancelled'); }
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Website link copied to clipboard!');
+            }
+        });
     </script>
 </body>
 </html>
