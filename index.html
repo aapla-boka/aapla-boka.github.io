@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>🐾 Aapla Boka | Fergusson College </title>
+    <title>🐾 Aapla Boka | Fergusson College </title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
@@ -29,7 +31,6 @@
 
         .container { padding: 0 20px; max-width: 1000px; margin: 0 auto; }
 
-        /* HEADER & NEW ELEMENTS */
         header {
             background: var(--white);
             padding: 50px 20px;
@@ -54,15 +55,50 @@
             color: var(--text-gray);
         }
 
+        /* PILL FLEXBOX */
+        .pill-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
         .boka-status {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             background: #f8f8f8;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.75rem;
             color: #666;
-            margin-top: 15px;
             border: 1px solid #eee;
+        }
+
+        /* MEOW COUNTER PILL */
+        .meow-pill {
+            display: inline-flex;
+            align-items: center;
+            background: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--fc-maroon);
+            border: 1px solid var(--fc-maroon);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .meow-pill:hover {
+            background: var(--fc-maroon);
+            color: white;
+        }
+
+        .meow-pill:active {
+            transform: scale(0.92);
         }
 
         .status-dot {
@@ -95,12 +131,8 @@
             transition: 0.3s;
         }
 
-        .share-btn:hover {
-            background: var(--fc-maroon);
-            color: white;
-        }
+        .share-btn:hover { background: var(--fc-maroon); color: white; }
 
-        /* SECTION HEADERS */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -108,10 +140,7 @@
             margin: 40px 0 15px;
         }
 
-        .section-title-group {
-            display: flex;
-            flex-direction: column;
-        }
+        .section-title-group { display: flex; flex-direction: column; }
 
         .section-title-marathi {
             font-family: 'Noto Serif Devanagari', serif;
@@ -130,12 +159,8 @@
             transition: 0.3s;
         }
 
-        .view-all-link:hover {
-            color: var(--fc-maroon);
-            border-color: var(--fc-maroon);
-        }
+        .view-all-link:hover { color: var(--fc-maroon); border-color: var(--fc-maroon); }
 
-        /* FADED SCROLL EFFECT */
         .horizontal-scroll {
             display: flex;
             overflow-x: auto;
@@ -143,14 +168,12 @@
             padding: 10px 0 30px;
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
-            /* Creates the fade out effect on the right */
             mask-image: linear-gradient(to right, black 85%, transparent 100%);
             -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
         }
 
         .horizontal-scroll::-webkit-scrollbar { display: none; }
 
-        /* STORY CARDS */
         .story-card {
             flex: 0 0 85%;
             background: var(--white);
@@ -165,134 +188,65 @@
         }
 
         .story-img-top {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            display: block;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
+            width: 100%; height: 180px; object-fit: cover; display: block;
+            border-bottom: 1px solid #eee; cursor: pointer;
         }
 
-        .story-content {
-            padding: 25px;
-        }
+        .story-content { padding: 25px; }
 
         .story-text {
-            font-size: 1.05rem;
-            margin-bottom: 10px;
-            color: #444;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            font-size: 1.05rem; margin-bottom: 10px; color: #444;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+            overflow: hidden; transition: all 0.3s ease;
         }
 
-        .story-text.expanded {
-            -webkit-line-clamp: unset;
-            overflow: visible;
-        }
+        .story-text.expanded { -webkit-line-clamp: unset; overflow: visible; }
 
         .read-more-btn {
-            background: none;
-            border: none;
-            color: var(--fc-maroon);
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            padding: 0;
-            margin-bottom: 15px;
-            display: inline-block;
+            background: none; border: none; color: var(--fc-maroon); font-family: inherit;
+            font-weight: 700; font-size: 0.85rem; cursor: pointer; padding: 0;
+            margin-bottom: 15px; display: inline-block;
         }
 
-        .author-tag {
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: var(--sage-green);
-            display: block;
-        }
+        .author-tag { font-weight: 700; font-size: 0.8rem; color: var(--sage-green); display: block; }
 
-        /* GALLERY ITEMS */
-        .gallery-item {
-            flex: 0 0 75%;
-            scroll-snap-align: center;
-        }
+        .gallery-item { flex: 0 0 75%; scroll-snap-align: center; }
 
         .gallery-item img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 15px;
-            display: block;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
+            width: 100%; height: 300px; object-fit: cover; border-radius: 15px;
+            display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer;
             transition: transform 0.2s;
         }
 
         .gallery-item img:hover { transform: scale(1.02); }
 
-        /* FULLSCREEN */
         .fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            cursor: pointer;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); display: flex; align-items: center;
+            justify-content: center; z-index: 1000; cursor: pointer;
         }
-        .fullscreen img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 5px;
-        }
+        .fullscreen img { max-width: 90%; max-height: 90%; border-radius: 5px; }
 
-        /* FOOTER & CTA */
         .cta-section {
-            background: var(--fc-maroon);
-            color: white;
-            padding: 50px 25px;
-            border-radius: 25px;
-            text-align: center;
-            margin: 40px 0;
+            background: var(--fc-maroon); color: white; padding: 50px 25px;
+            border-radius: 25px; text-align: center; margin: 40px 0;
         }
 
         .btn {
-            display: inline-block;
-            background: white;
-            color: var(--fc-maroon);
-            padding: 16px 32px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 700;
-            margin-top: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: inline-block; background: white; color: var(--fc-maroon);
+            padding: 16px 32px; border-radius: 50px; text-decoration: none;
+            font-weight: 700; margin-top: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .privacy-box {
-            font-size: 0.9rem;
-            background: #fff;
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid var(--light-gray);
-            margin-bottom: 50px;
+            font-size: 0.9rem; background: #fff; padding: 30px; border-radius: 20px;
+            border: 1px solid var(--light-gray); margin-bottom: 50px;
         }
 
         .ethics-highlight {
-            display: block;
-            color: var(--fc-maroon);
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-top: 15px;
-            text-align: center;
-            border: 2px dashed var(--fc-maroon);
-            padding: 15px;
-            border-radius: 10px;
+            display: block; color: var(--fc-maroon); font-weight: 800; font-size: 1.1rem;
+            margin-top: 15px; text-align: center; border: 2px dashed var(--fc-maroon);
+            padding: 15px; border-radius: 10px;
         }
 
         footer { text-align: center; padding: 40px; color: #999; font-size: 0.8rem; border-top: 1px solid #eee; }
@@ -310,10 +264,17 @@
         <span class="marathi-title">आपला बोका</span>
         <p class="tagline">The Silent Guardian of Fergusson College</p>
         
-        <div class="boka-status">
-            <span class="status-dot"></span> 
-            Last Spotted: Near Main Gate
+        <div class="pill-container">
+            <div class="boka-status">
+                <span class="status-dot"></span> 
+                Last Spotted: Near Main Gate
+            </div>
+
+            <div id="meowBtn" class="meow-pill">
+                🐾 <span id="meowCount">...</span> Meows
+            </div>
         </div>
+        
         <br>
         <button id="shareBtn" class="share-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y1="15"></line></svg>
@@ -322,7 +283,6 @@
     </header>
 
     <div class="container">
-        
         <div class="section-header">
             <div class="section-title-group">
                 <h2 class="section-title-marathi">चित्रशाळा</h2>
@@ -405,7 +365,7 @@
 
         <div class="privacy-box">
             <h3 style="font-family: 'Noto Serif Devanagari'; color: var(--fc-maroon);">महत्वाची सूचना (Important Note)</h3>
-            <p style="margin-top: 10px;">If you would like any image or story removed, please contact us at chillichickensandwich@gmail.com and we will honor your request promptly.</p>
+            <p style="margin-top: 10px;">If you would like any image or story removed, please contact us at mailto:chillichickensandwich@gmail.com and we will honor your request promptly.</p>
             <span class="ethics-highlight">
                 PLEASE DO NOT DISTURB BOKA FOR PHOTOS. <br>Respect his space, his sleep, and his freedom.
             </span>
@@ -418,7 +378,48 @@
     </footer>
 
     <script>
-        // Fullscreen Logic
+        /* ---------------------------
+           GLOBAL MEOW COUNTER LOGIC
+        --------------------------- */
+        // We use a public API to keep a perpetual counter
+        const namespace = "fergusson-boka-fc"; 
+        const key = "global-meows";
+        const meowCountDisplay = document.getElementById('meowCount');
+
+        // Get current count from server
+        async function fetchMeows() {
+            try {
+                const response = await fetch(`https://api.countapi.xyz/get/${namespace}/${key}`);
+                const data = await response.json();
+                meowCountDisplay.innerText = data.value || 0;
+            } catch (err) { meowCountDisplay.innerText = "0"; }
+        }
+
+        // Click handler
+        document.getElementById('meowBtn').addEventListener('click', async () => {
+            // 1. Fire Confetti
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.6 },
+                colors: ['#800000', '#5a6d5a', '#E0E0E0']
+            });
+
+            // 2. Update Global Counter
+            try {
+                const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                const data = await response.json();
+                meowCountDisplay.innerText = data.value;
+            } catch (err) { console.error("Meow counter failed"); }
+        });
+
+        // Initialize count on page load
+        fetchMeows();
+
+
+        /* ---------------------------
+           EXISTING LOGIC (RESTORED)
+        --------------------------- */
         window.fullscreen = (event) => {
           const overlay = document.createElement('div')
           overlay.classList.add('fullscreen')
@@ -436,7 +437,6 @@
           })
         }
 
-        // Read More Toggle Logic
         function toggleReadMore(btn) {
             const textElement = btn.previousElementSibling;
             if (textElement.classList.contains('expanded')) {
@@ -448,7 +448,6 @@
             }
         }
 
-        // Share Button Logic
         document.getElementById('shareBtn').addEventListener('click', async () => {
             if (navigator.share) {
                 try {
