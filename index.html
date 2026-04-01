@@ -395,41 +395,7 @@
     </footer>
 
     <script>
-        /* ---------------------------
-           GLOBAL MEOW COUNTER LOGIC
-        --------------------------- */
-// --- 1. SETTINGS ---
-const meowCountDisplay = document.getElementById('meowCount');
-const countKey = "fergusson_boka_total_meows_2026"; 
-
-// 1. Load the last known count from the browser's memory
-let localCount = parseInt(localStorage.getItem('boka_fallback_count')) || 42;
-meowCountDisplay.innerText = localCount;
-
-// 2. Try to get the REAL global count from the server
-fetch(`https://api.countapi.xyz/get/aaplaboka/${countKey}`)
-    .then(res => res.json())
-    .then(data => {
-        if(data.value) {
-            meowCountDisplay.innerText = data.value;
-            localStorage.setItem('boka_fallback_count', data.value);
-        }
-    })
-    .catch(() => console.log("Working in local mode..."));
-
-// 3. The Click Handler
-document.getElementById('meowBtn').addEventListener('click', () => {
-    // Confetti
-    confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 } });
-
-    // Update the screen immediately
-    let current = parseInt(meowCountDisplay.innerText);
-    meowCountDisplay.innerText = current + 1;
-    localStorage.setItem('boka_fallback_count', current + 1);
-
-    // Try to tell the global server (will work once the site is live)
-    fetch(`https://api.countapi.xyz/hit/aaplaboka/${countKey}`).catch(() => {});
-});
+    
         /* ---------------------------
            EXISTING LOGIC (RESTORED)
         --------------------------- */
