@@ -275,6 +275,14 @@
     </style>
 </head>
 <body>
+    <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="background:var(--soft-cream); border-radius:20px; padding:20px; position:relative; text-align:center;">
+        <h2 class="section-title-marathi">Boka Jump</h2>
+        <canvas id="gameCanvas" width="320" height="480" style="border:4px solid var(--fc-maroon); border-radius:10px; background:#a2d2ff; display:block; margin:20px auto;"></canvas>
+        <p>Tap or Press Space to Jump!</p>
+        <button id="closeGame" class="share-btn">Close Game</button>
+    </div>
+</div>
 
     <header>
         <span class="marathi-title">आपला बोका</span>
@@ -286,9 +294,9 @@
                 Last Spotted: Near JR College Building
             </div>
 
-            <div id="meowBtn" class="meow-pill">
-                <span id="meowCount"></span> Meow
-            </div>
+            <div id="gameTrigger" class="meow-pill" style="background: var(--fc-maroon); color: white;">
+                    🐾 Play Boka Jump!
+                </div>
         </div>
     </header>
 
@@ -395,6 +403,87 @@
     </footer>
 
     <script>
+        const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const trigger = document.getElementById('gameTrigger');
+const overlay = document.getElementById('gameOverlay');
+
+// Game Variables
+let bokaY = 200, velocity = 0, gravity = 0.4, jump = -7;
+let pipes = [], score = 0, gameActive = false;
+
+// Trigger Game
+trigger.onclick = () => {
+    overlay.style.display = 'flex';
+    resetGame();
+    gameActive = true;
+    requestAnimationFrame(gameLoop);
+};
+
+document.getElementById('closeGame').onclick = () => {
+    overlay.style.display = 'none';
+    gameActive = false;
+};
+
+function resetGame() {
+    bokaY = 200; velocity = 0; score = 0;
+    pipes = [{ x: canvas.width, y: 200 }];
+}
+
+// Controls
+const action = () => { if(gameActive) velocity = jump; };
+window.addEventListener('keydown', (e) => { if(e.code === 'Space') action(); });
+canvas.addEventListener('touchstart', action);
+
+function gameLoop() {
+    if (!gameActive) return;
+
+    // Background & Physics
+    ctx.fillStyle = "#a2d2ff"; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    velocity += gravity;
+    bokaY += velocity;
+
+    // Draw Boka (Simplified as a Paw/Circle for now)
+    ctx.font = "30px Arial";
+    ctx.fillText("😺", 50, bokaY);
+
+    // Pipes (Obstacles)
+    if (pipes[pipes.length - 1].x < canvas.width - 150) {
+        pipes.push({ x: canvas.width, y: Math.random() * (canvas.height - 150) + 50 });
+    }
+
+    pipes.forEach((p, i) => {
+        p.x -= 2;
+        ctx.fillStyle = "#800000"; // FC Maroon Obstacles
+        ctx.fillRect(p.x, 0, 40, p.y); // Top pipe
+        ctx.fillRect(p.x, p.y + 120, 40, canvas.height); // Bottom gap
+
+        // Collision
+        if (50 + 20 > p.x && 50 < p.x + 40 && (bokaY < p.y || bokaY > p.y + 100)) {
+            gameActive = false;
+            alert("Game Over! Score: " + score);
+        }
+
+        if (p.x === 50) score++;
+    });
+
+    pipes = pipes.filter(p => p.x > -40);
+
+    // Score
+    ctx.fillStyle = "#333";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 10, 30);
+
+    // Bounds check
+    if (bokaY > canvas.height || bokaY < 0) {
+        gameActive = false;
+        alert("Boka fell off! Score: " + score);
+    }
+
+    if (gameActive) requestAnimationFrame(gameLoop);
+}
     
         /* ---------------------------
            EXISTING LOGIC (RESTORED)
