@@ -275,15 +275,25 @@
     </style>
 </head>
 <body>
-    <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; flex-direction:column; align-items:center; justify-content:center;">
-    <div style="background:var(--soft-cream); border-radius:20px; padding:20px; position:relative; text-align:center;">
-        <h2 class="section-title-marathi">Boka Jump</h2>
-        <canvas id="gameCanvas" width="320" height="480" style="border:4px solid var(--fc-maroon); border-radius:10px; background:#a2d2ff; display:block; margin:20px auto;"></canvas>
-        <p>Tap or Press Space to Jump!</p>
-        <button id="closeGame" class="share-btn">Close Game</button>
+    <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; flex-direction:column; align-items:center; justify-content:center; font-family: 'Plus Jakarta Sans', sans-serif;">
+    <div style="background:var(--soft-cream); border-radius:24px; padding:30px; position:relative; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 360px;">
+        <h2 class="section-title-marathi" style="margin-bottom:10px;">Boka Jump 🐾</h2>
+        
+        <div style="position:relative; width:320px; height:480px; margin: 0 auto;">
+            <canvas id="gameCanvas" width="320" height="480" style="border:4px solid var(--fc-maroon); border-radius:12px; background:#a2d2ff; display:block;"></canvas>
+            
+            <div id="gameUI" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(253, 251, 247, 0.8); border-radius:8px;">
+                <h3 id="uiStatus" style="color:var(--fc-maroon); font-size:1.5rem; margin-bottom:10px;">Ready?</h3>
+                <p id="uiScore" style="margin-bottom:5px; font-weight:bold; display:none;"></p>
+                <p id="uiBest" style="font-size:0.9rem; color:#666; margin-bottom:20px;">Best: 0</p>
+                <button id="startBtn" class="btn" style="margin-top:0; padding:12px 24px;">Start Game</button>
+            </div>
+        </div>
+        
+        <p style="font-size:0.75rem; color:#888; margin-top:15px;">SPACE or TAP to jump</p>
+        <button id="closeGame" style="background:none; border:none; color:#999; cursor:pointer; margin-top:10px; font-size:0.8rem; text-decoration:underline;">Exit to Website</button>
     </div>
 </div>
-
     <header>
         <span class="marathi-title">आपला बोका</span>
         <p class="tagline">The Silent Guardian of Fergusson College</p>
@@ -403,86 +413,131 @@
     </footer>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
+      const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const trigger = document.getElementById('gameTrigger');
 const overlay = document.getElementById('gameOverlay');
+const gameUI = document.getElementById('gameUI');
+const uiStatus = document.getElementById('uiStatus');
+const uiScore = document.getElementById('uiScore');
+const uiBest = document.getElementById('uiBest');
+const startBtn = document.getElementById('startBtn');
 
-// Game Variables
-let bokaY = 200, velocity = 0, gravity = 0.4, jump = -7;
-let pipes = [], score = 0, gameActive = false;
+// Game Constants
+const GRAVITY = 0.25;
+const JUMP = -4.8;
+const PIPE_SPEED = 2.5;
+const PIPE_GAP = 150;
 
-// Trigger Game
-trigger.onclick = () => {
-    overlay.style.display = 'flex';
-    resetGame();
-    gameActive = true;
-    requestAnimationFrame(gameLoop);
-};
+// Game State
+let bokaY, velocity, pipes, score, gameActive = false;
+let highScore = localStorage.getItem('boka_high_score') || 0;
+uiBest.innerText = `Best: ${highScore}`;
 
-document.getElementById('closeGame').onclick = () => {
-    overlay.style.display = 'none';
+trigger.onclick = () => { overlay.style.display = 'flex'; showMenu(); };
+document.getElementById('closeGame').onclick = () => { overlay.style.display = 'none'; gameActive = false; };
+
+function showMenu(isGameOver = false) {
     gameActive = false;
-};
-
-function resetGame() {
-    bokaY = 200; velocity = 0; score = 0;
-    pipes = [{ x: canvas.width, y: 200 }];
+    gameUI.style.display = 'flex';
+    uiBest.innerText = `Best: ${highScore}`;
+    
+    if (isGameOver) {
+        uiStatus.innerText = "Game Over!";
+        uiScore.innerText = `Score: ${score}`;
+        uiScore.style.display = 'block';
+        startBtn.innerText = "Try Again";
+    } else {
+        uiStatus.innerText = "Boka Jump";
+        uiScore.style.display = 'none';
+        startBtn.innerText = "Start Game";
+    }
 }
 
-// Controls
-const action = () => { if(gameActive) velocity = jump; };
-window.addEventListener('keydown', (e) => { if(e.code === 'Space') action(); });
-canvas.addEventListener('touchstart', action);
+function startGame() {
+    bokaY = 200;
+    velocity = 0;
+    score = 0;
+    pipes = [{ x: canvas.width, y: 150 }];
+    gameActive = true;
+    gameUI.style.display = 'none';
+    requestAnimationFrame(gameLoop);
+}
+
+startBtn.onclick = startGame;
+
+const action = (e) => {
+    if (gameActive) {
+        velocity = JUMP;
+    } else if (gameUI.style.display !== 'none' && (e.code === 'Space' || e.type === 'touchstart')) {
+        // Allow starting with space/tap if menu is visible
+        if(e.target === startBtn || e.target === canvas) startGame();
+    }
+};
+
+window.addEventListener('keydown', (e) => { if(e.code === 'Space') action(e); });
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); action(e); });
 
 function gameLoop() {
     if (!gameActive) return;
 
-    // Background & Physics
-    ctx.fillStyle = "#a2d2ff"; // Sky blue
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    velocity += gravity;
+    // 1. Physics
+    velocity += GRAVITY;
     bokaY += velocity;
 
-    // Draw Boka (Simplified as a Paw/Circle for now)
-    ctx.font = "30px Arial";
-    ctx.fillText("😺", 50, bokaY);
+    // 2. Draw Background
+    ctx.fillStyle = "#a2d2ff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Pipes (Obstacles)
-    if (pipes[pipes.length - 1].x < canvas.width - 150) {
-        pipes.push({ x: canvas.width, y: Math.random() * (canvas.height - 150) + 50 });
+    // 3. Draw Pipes
+    ctx.fillStyle = "#800000";
+    if (pipes[pipes.length - 1].x < canvas.width - 180) {
+        pipes.push({ x: canvas.width, y: Math.random() * (canvas.height - PIPE_GAP - 100) + 50 });
     }
 
-    pipes.forEach((p, i) => {
-        p.x -= 2;
-        ctx.fillStyle = "#800000"; // FC Maroon Obstacles
-        ctx.fillRect(p.x, 0, 40, p.y); // Top pipe
-        ctx.fillRect(p.x, p.y + 120, 40, canvas.height); // Bottom gap
+    pipes.forEach((p) => {
+        p.x -= PIPE_SPEED;
+        
+        // Top Pipe
+        ctx.fillRect(p.x, 0, 50, p.y);
+        // Bottom Pipe
+        ctx.fillRect(p.x, p.y + PIPE_GAP, 50, canvas.height);
 
-        // Collision
-        if (50 + 20 > p.x && 50 < p.x + 40 && (bokaY < p.y || bokaY > p.y + 100)) {
-            gameActive = false;
-            alert("Game Over! Score: " + score);
+        // Collision Detection
+        if (50 + 25 > p.x && 50 < p.x + 50) {
+            if (bokaY < p.y || bokaY + 20 > p.y + PIPE_GAP) endGame();
         }
 
-        if (p.x === 50) score++;
+        // Scoring
+        if (p.x + PIPE_SPEED > 50 && p.x <= 50) score++;
     });
 
-    pipes = pipes.filter(p => p.x > -40);
+    pipes = pipes.filter(p => p.x > -50);
 
-    // Score
-    ctx.fillStyle = "#333";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 10, 30);
+    // 4. Draw Boka
+    ctx.font = "32px Arial";
+    ctx.fillText("😺", 40, bokaY + 20);
 
-    // Bounds check
-    if (bokaY > canvas.height || bokaY < 0) {
-        gameActive = false;
-        alert("Boka fell off! Score: " + score);
-    }
+    // 5. Ground/Ceiling Check
+    if (bokaY > canvas.height || bokaY < -20) endGame();
+
+    // 6. HUD Score
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 24px 'Plus Jakarta Sans'";
+    ctx.textAlign = "center";
+    ctx.fillText(score, canvas.width / 2, 50);
 
     if (gameActive) requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+    gameActive = false;
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('boka_high_score', highScore);
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+    showMenu(true);
 }
     
         /* ---------------------------
