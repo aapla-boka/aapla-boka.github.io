@@ -424,18 +424,24 @@ const ctx = canvas.getContext('2d');
 const scoreVal = document.getElementById('scoreVal');
 const bestVal = document.getElementById('bestVal');
 const gameMenu = document.getElementById('gameMenu');
+const startBtn = document.getElementById('startBtn');
 
 canvas.width = 400;
 canvas.height = 400;
 
-let score = 0, highScore = localStorage.getItem('boka_catch_best') || 0, gameActive = false;
+let score = 0;
+// Fixed: Ensure highScore is always treated as a Number
+let highScore = parseInt(localStorage.getItem('boka_catch_best')) || 0; 
+let gameActive = false;
+let hasPlayed = false; 
+
 let player = { x: 175, targetX: 175, y: 330, w: 60, h: 60 };
 let items = [];
-let baseSpeed = 4; // Starting speed
+let baseSpeed = 4;
 
+// Initial High Score Display
 bestVal.innerText = highScore;
 
-// --- SILKY SMOOTH INPUT ---
 const getPos = (e) => {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -446,18 +452,28 @@ const move = (e) => { if(gameActive) { e.preventDefault(); player.targetX = getP
 canvas.addEventListener('mousemove', move);
 canvas.addEventListener('touchmove', move, { passive: false });
 
-document.getElementById('gameTrigger').onclick = () => { document.getElementById('gameOverlay').style.display = 'flex'; };
-document.getElementById('closeGame').onclick = () => { gameActive = false; document.getElementById('gameOverlay').style.display = 'none'; };
+document.getElementById('gameTrigger').onclick = () => { 
+    document.getElementById('gameOverlay').style.display = 'flex'; 
+};
 
-document.getElementById('startBtn').onclick = () => {
-    score = 0; items = []; gameActive = true; baseSpeed = 4;
+document.getElementById('closeGame').onclick = () => { 
+    gameActive = false; 
+    document.getElementById('gameOverlay').style.display = 'none'; 
+};
+
+startBtn.onclick = () => {
+    score = 0; 
+    items = []; 
+    gameActive = true; 
+    baseSpeed = 4;
     scoreVal.innerText = "0";
     gameMenu.style.display = 'none';
+    hasPlayed = true; 
     update();
 };
 
 function spawnItem() {
-    const isDog = Math.random() < 0.3; // 30% Dog chance
+    const isDog = Math.random() < 0.3;
     items.push({
         x: Math.random() * (canvas.width - 40),
         y: -50,
@@ -472,16 +488,16 @@ function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Smooth Interpolation
+    // Smooth Glide
     player.x += (player.targetX - player.x) * 0.25;
     if(player.x < 0) player.x = 0;
     if(player.x > canvas.width - player.w) player.x = canvas.width - player.w;
 
-    // 2. Draw Boka
+    // Draw Boka
     ctx.font = "50px Arial";
     ctx.fillText("😺", player.x, player.y + 45);
 
-    // 3. Item Logic
+    // Item Spawning
     if (Math.random() < 0.04) spawnItem();
 
     for (let i = items.length - 1; i >= 0; i--) {
@@ -500,7 +516,7 @@ function update() {
             } else {
                 score += 10;
                 scoreVal.innerText = score;
-                baseSpeed += 0.05; // Gradually gets faster!
+                baseSpeed += 0.08; // Slightly faster scaling for excitement
                 items.splice(i, 1);
             }
         } else if (it.y > canvas.height) {
@@ -508,23 +524,32 @@ function update() {
         }
     }
 
-    requestAnimationFrame(update);
+    if (gameActive) requestAnimationFrame(update);
 }
 
 function endGame() {
     gameActive = false;
     gameMenu.style.display = 'flex';
     document.getElementById('instructionBox').style.display = 'none';
-    document.getElementById('menuStatus').innerHTML = `<span style="color:#e74c3c">OH NO! 🐶</span><br>Final Score: ${score}`;
     
+    // Update Button Text
+    startBtn.innerText = "START NEW GAME";
+
+    // High Score Persistence Logic
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('boka_catch_best', highScore);
         bestVal.innerText = highScore;
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        
+        // Celebration
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        document.getElementById('menuStatus').innerHTML = 
+            `<span style="color:#2ecc71">NEW BEST! 🏆</span><br>Score: ${score}`;
+    } else {
+        document.getElementById('menuStatus').innerHTML = 
+            `<span style="color:#e74c3c">GAME OVER 🐶</span><br>Final Score: ${score}`;
     }
-}
-    
+}    
         /* ---------------------------
            EXISTING LOGIC (RESTORED)
         --------------------------- */
