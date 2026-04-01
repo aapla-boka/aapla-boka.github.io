@@ -275,26 +275,27 @@
     </style>
 </head>
 <body>
-    <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; flex-direction:column; align-items:center; justify-content:center; font-family: 'Plus Jakarta Sans', sans-serif;">
-    <div style="background:var(--soft-cream); border-radius:24px; padding:30px; position:relative; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 360px;">
-        <h2 class="section-title-marathi" style="margin-bottom:10px;">Boka Jump 🐾</h2>
+    <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center; font-family: 'Plus Jakarta Sans', sans-serif;">
+    <div style="background:#1a1a1a; border-radius:16px; padding:40px; text-align:center; box-shadow: 0 0 40px rgba(0,0,0,1); border: 1px solid #333; width: 600px; max-width: 95%;">
+        <h2 style="color:white; font-family: 'Noto Serif Devanagari'; margin-bottom: 20px;">बोका रनर (Boka Runner)</h2>
         
-        <div style="position:relative; width:320px; height:480px; margin: 0 auto;">
-            <canvas id="gameCanvas" width="320" height="480" style="border:4px solid var(--fc-maroon); border-radius:12px; background:#a2d2ff; display:block;"></canvas>
+        <div style="position:relative; overflow:hidden; border-radius: 8px; background: #222; border: 2px solid var(--fc-maroon);">
+            <canvas id="gameCanvas" width="600" height="200" style="display:block;"></canvas>
             
-            <div id="gameUI" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(253, 251, 247, 0.8); border-radius:8px;">
-                <h3 id="uiStatus" style="color:var(--fc-maroon); font-size:1.5rem; margin-bottom:10px;">Ready?</h3>
-                <p id="uiScore" style="margin-bottom:5px; font-weight:bold; display:none;"></p>
-                <p id="uiBest" style="font-size:0.9rem; color:#666; margin-bottom:20px;">Best: 0</p>
-                <button id="startBtn" class="btn" style="margin-top:0; padding:12px 24px;">Start Game</button>
+            <div id="gameUI" style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.7);">
+                <h3 id="uiStatus" style="color:white; margin-bottom:15px;">Press Space to Start</h3>
+                <button id="startBtn" class="btn" style="background:var(--fc-maroon); color:white; border:none; padding:12px 30px; cursor:pointer; border-radius:50px; font-weight:bold;">START</button>
             </div>
         </div>
+
+        <div style="display:flex; justify-content: space-between; margin-top:15px; color:#888; font-size:0.9rem;">
+            <span>Score: <span id="currentScore" style="color:white;">0</span></span>
+            <span>Best: <span id="bestScore" style="color:white;">0</span></span>
+        </div>
         
-        <p style="font-size:0.75rem; color:#888; margin-top:15px;">SPACE or TAP to jump</p>
-        <button id="closeGame" style="background:none; border:none; color:#999; cursor:pointer; margin-top:10px; font-size:0.8rem; text-decoration:underline;">Exit to Website</button>
+        <button id="closeGame" style="background:none; border:none; color:#555; cursor:pointer; margin-top:20px; text-decoration:underline;">Return to Fergusson College</button>
     </div>
-</div>
-    <header>
+</div>    <header>
         <span class="marathi-title">आपला बोका</span>
         <p class="tagline">The Silent Guardian of Fergusson College</p>
         
@@ -415,129 +416,112 @@
     <script>
       const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const trigger = document.getElementById('gameTrigger');
 const overlay = document.getElementById('gameOverlay');
-const gameUI = document.getElementById('gameUI');
-const uiStatus = document.getElementById('uiStatus');
-const uiScore = document.getElementById('uiScore');
-const uiBest = document.getElementById('uiBest');
 const startBtn = document.getElementById('startBtn');
+const scoreEl = document.getElementById('currentScore');
+const bestEl = document.getElementById('bestScore');
 
-// Game Constants
-const GRAVITY = 0.25;
-const JUMP = -4.8;
-const PIPE_SPEED = 2.5;
-const PIPE_GAP = 150;
+let boka = { x: 50, y: 150, w: 40, h: 40, dy: 0, jumpForce: 12, grounded: false };
+let obstacles = [];
+let score = 0;
+let gameActive = false;
+let gameSpeed = 5;
 
-// Game State
-let bokaY, velocity, pipes, score, gameActive = false;
-let highScore = localStorage.getItem('boka_high_score') || 0;
-uiBest.innerText = `Best: ${highScore}`;
+// Load High Score
+bestEl.innerText = localStorage.getItem('boka_runner_best') || 0;
 
-trigger.onclick = () => { overlay.style.display = 'flex'; showMenu(); };
+document.getElementById('gameTrigger').onclick = () => { overlay.style.display = 'flex'; };
 document.getElementById('closeGame').onclick = () => { overlay.style.display = 'none'; gameActive = false; };
 
-function showMenu(isGameOver = false) {
-    gameActive = false;
-    gameUI.style.display = 'flex';
-    uiBest.innerText = `Best: ${highScore}`;
-    
-    if (isGameOver) {
-        uiStatus.innerText = "Game Over!";
-        uiScore.innerText = `Score: ${score}`;
-        uiScore.style.display = 'block';
-        startBtn.innerText = "Try Again";
-    } else {
-        uiStatus.innerText = "Boka Jump";
-        uiScore.style.display = 'none';
-        startBtn.innerText = "Start Game";
-    }
+function spawnObstacle() {
+    let size = Math.random() * (40 - 20) + 20;
+    obstacles.push({ x: canvas.width, y: 200 - size, w: 20, h: size });
 }
 
 function startGame() {
-    bokaY = 200;
-    velocity = 0;
-    score = 0;
-    pipes = [{ x: canvas.width, y: 150 }];
     gameActive = true;
-    gameUI.style.display = 'none';
-    requestAnimationFrame(gameLoop);
+    score = 0;
+    gameSpeed = 5;
+    obstacles = [];
+    boka.y = 150;
+    boka.dy = 0;
+    document.getElementById('gameUI').style.display = 'none';
+    requestAnimationFrame(update);
 }
 
 startBtn.onclick = startGame;
 
-const action = (e) => {
-    if (gameActive) {
-        velocity = JUMP;
-    } else if (gameUI.style.display !== 'none' && (e.code === 'Space' || e.type === 'touchstart')) {
-        // Allow starting with space/tap if menu is visible
-        if(e.target === startBtn || e.target === canvas) startGame();
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        if (!gameActive) startGame();
+        else if (boka.grounded) {
+            boka.dy = -boka.jumpForce;
+            boka.grounded = false;
+        }
     }
-};
+});
 
-window.addEventListener('keydown', (e) => { if(e.code === 'Space') action(e); });
-canvas.addEventListener('touchstart', (e) => { e.preventDefault(); action(e); });
-
-function gameLoop() {
+function update() {
     if (!gameActive) return;
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     // 1. Physics
-    velocity += GRAVITY;
-    bokaY += velocity;
+    boka.dy += 0.6; // Gravity
+    boka.y += boka.dy;
 
-    // 2. Draw Background
-    ctx.fillStyle = "#a2d2ff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 3. Draw Pipes
-    ctx.fillStyle = "#800000";
-    if (pipes[pipes.length - 1].x < canvas.width - 180) {
-        pipes.push({ x: canvas.width, y: Math.random() * (canvas.height - PIPE_GAP - 100) + 50 });
+    if (boka.y + boka.h > 200) {
+        boka.y = 200 - boka.h;
+        boka.dy = 0;
+        boka.grounded = true;
     }
 
-    pipes.forEach((p) => {
-        p.x -= PIPE_SPEED;
+    // 2. Draw Ground
+    ctx.strokeStyle = '#333';
+    ctx.beginPath(); ctx.moveTo(0, 200); ctx.lineTo(canvas.width, 200); ctx.stroke();
+
+    // 3. Draw Boka
+    ctx.font = "40px Arial";
+    ctx.fillText("🐾", boka.x, boka.y + 35);
+
+    // 4. Obstacles
+    if (Math.random() < 0.015) spawnObstacle();
+
+    obstacles.forEach((obs, i) => {
+        obs.x -= gameSpeed;
         
-        // Top Pipe
-        ctx.fillRect(p.x, 0, 50, p.y);
-        // Bottom Pipe
-        ctx.fillRect(p.x, p.y + PIPE_GAP, 50, canvas.height);
+        // Draw Obstacle (Themed as a Water Pot/Crate)
+        ctx.fillStyle = '#800000';
+        ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
-        // Collision Detection
-        if (50 + 25 > p.x && 50 < p.x + 50) {
-            if (bokaY < p.y || bokaY + 20 > p.y + PIPE_GAP) endGame();
+        // Collision Check (Professional Tight Box)
+        if (boka.x < obs.x + obs.w && boka.x + boka.w > obs.x &&
+            boka.y < obs.y + obs.h && boka.y + boka.h > obs.y) {
+            gameOver();
         }
-
-        // Scoring
-        if (p.x + PIPE_SPEED > 50 && p.x <= 50) score++;
     });
 
-    pipes = pipes.filter(p => p.x > -50);
+    obstacles = obstacles.filter(o => o.x > -20);
+    
+    // 5. Progression
+    score++;
+    gameSpeed += 0.001;
+    scoreEl.innerText = Math.floor(score / 10);
 
-    // 4. Draw Boka
-    ctx.font = "32px Arial";
-    ctx.fillText("😺", 40, bokaY + 20);
-
-    // 5. Ground/Ceiling Check
-    if (bokaY > canvas.height || bokaY < -20) endGame();
-
-    // 6. HUD Score
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 24px 'Plus Jakarta Sans'";
-    ctx.textAlign = "center";
-    ctx.fillText(score, canvas.width / 2, 50);
-
-    if (gameActive) requestAnimationFrame(gameLoop);
+    requestAnimationFrame(update);
 }
 
-function endGame() {
+function gameOver() {
     gameActive = false;
-    if (score > highScore) {
-        highScore = score;
-        localStorage.setItem('boka_high_score', highScore);
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    document.getElementById('gameUI').style.display = 'flex';
+    document.getElementById('uiStatus').innerText = "Mission Failed";
+    
+    let finalScore = Math.floor(score / 10);
+    let best = localStorage.getItem('boka_runner_best') || 0;
+    if (finalScore > best) {
+        localStorage.setItem('boka_runner_best', finalScore);
+        bestEl.innerText = finalScore;
     }
-    showMenu(true);
 }
     
         /* ---------------------------
