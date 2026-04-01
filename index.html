@@ -275,25 +275,29 @@
     </style>
 </head>
 <body>
- <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index:2000; align-items:center; justify-content:center; touch-action: none;">
-    <div style="background:var(--soft-cream); border-radius:24px; padding:20px; text-align:center; width:90%; max-width:420px; border: 4px solid var(--fc-maroon); box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
-        <h2 class="section-title-marathi" style="font-size:1.5rem; margin-bottom:5px;">Boka's Buffet 🍗</h2>
+ <div id="gameOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:2000; align-items:center; justify-content:center; touch-action:none;">
+    <div style="background:var(--soft-cream); border-radius:24px; padding:25px; text-align:center; width:92%; max-width:400px; border: 2px solid var(--fc-maroon); box-shadow: 0 15px 35px rgba(0,0,0,0.1);">
+        <h2 class="section-title-marathi" style="margin-bottom:5px;">Boka's Buffet 🍗</h2>
         
-        <div style="position:relative; background:#111; border-radius:12px; overflow:hidden; aspect-ratio: 1/1; width:100%;">
-            <canvas id="gameCanvas" style="display:block; width:100%; height:100%; cursor: none;"></canvas>
+        <div style="position:relative; background:#fff; border-radius:12px; overflow:hidden; border:2px solid #eee; aspect-ratio: 1/1;">
+            <canvas id="gameCanvas" style="display:block; width:100%; height:100%;"></canvas>
             
-            <div id="gameMenu" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
-                <h3 id="menuStatus" style="margin-bottom:20px; font-family:'Noto Serif Devanagari';">Ready?</h3>
-                <button id="startBtn" class="btn" style="box-shadow:none; transform:scale(1.1);">START GAME</button>
-                <p style="font-size:0.7rem; margin-top:15px; opacity:0.7;">Drag to move Boka</p>
+            <div id="gameMenu" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+                <div id="instructionBox" style="margin-bottom:20px;">
+                    <p style="font-weight:700; color:var(--fc-maroon);">HOW TO PLAY:</p>
+                    <p style="font-size:0.85rem; margin:5px 0;">✅ Catch 🍗 for +10 Points</p>
+                    <p style="font-size:0.85rem; margin:5px 0;">❌ Avoid 🐶 (Game Over!)</p>
+                    <p style="font-size:0.75rem; color:#666; margin-top:10px;">Move your mouse or drag your finger</p>
+                </div>
+                <button id="startBtn" class="btn" style="margin-top:0;">START GAME</button>
             </div>
         </div>
 
-        <div style="display:flex; justify-content:space-around; margin-top:15px; font-weight:700; color:var(--fc-maroon); font-size:1.1rem;">
+        <div style="display:flex; justify-content:space-around; margin-top:15px; font-weight:700; color:var(--fc-maroon);">
             <span>Score: <span id="scoreVal">0</span></span>
             <span>Best: <span id="bestVal">0</span></span>
         </div>
-        <button id="closeGame" style="margin-top:15px; background:none; border:none; color:#777; cursor:pointer; text-decoration:underline; font-size:0.8rem;">Back to Fergusson</button>
+        <button id="closeGame" style="margin-top:15px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline; font-size:0.8rem;">Return to Website</button>
     </div>
 </div>
     <header>
@@ -415,50 +419,51 @@
     </footer>
 
     <script>
- const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreVal = document.getElementById('scoreVal');
 const bestVal = document.getElementById('bestVal');
 const gameMenu = document.getElementById('gameMenu');
 
-// Set internal resolution (High DPI)
 canvas.width = 400;
 canvas.height = 400;
 
 let score = 0, highScore = localStorage.getItem('boka_catch_best') || 0, gameActive = false;
 let player = { x: 175, targetX: 175, y: 330, w: 60, h: 60 };
-let items = [], particles = [];
+let items = [];
+let baseSpeed = 4; // Starting speed
+
 bestVal.innerText = highScore;
 
-// --- INPUT HANDLING ---
-const moveHandler = (e) => {
-    e.preventDefault();
+// --- SILKY SMOOTH INPUT ---
+const getPos = (e) => {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const scaleX = canvas.width / rect.width;
-    player.targetX = (clientX - rect.left) * scaleX - player.w / 2;
+    return (clientX - rect.left) * (canvas.width / rect.width) - player.w / 2;
 };
 
-canvas.addEventListener('mousemove', moveHandler);
-canvas.addEventListener('touchmove', moveHandler, { passive: false });
+const move = (e) => { if(gameActive) { e.preventDefault(); player.targetX = getPos(e); }};
+canvas.addEventListener('mousemove', move);
+canvas.addEventListener('touchmove', move, { passive: false });
 
 document.getElementById('gameTrigger').onclick = () => { document.getElementById('gameOverlay').style.display = 'flex'; };
 document.getElementById('closeGame').onclick = () => { gameActive = false; document.getElementById('gameOverlay').style.display = 'none'; };
 
 document.getElementById('startBtn').onclick = () => {
-    score = 0; items = []; gameActive = true;
+    score = 0; items = []; gameActive = true; baseSpeed = 4;
+    scoreVal.innerText = "0";
     gameMenu.style.display = 'none';
     update();
 };
 
 function spawnItem() {
-    const isBad = Math.random() < 0.25;
+    const isDog = Math.random() < 0.3; // 30% Dog chance
     items.push({
         x: Math.random() * (canvas.width - 40),
-        y: -40,
-        symbol: isBad ? '🐶' : '🍗',
-        speed: 4 + Math.random() * 3,
-        isBad: isBad
+        y: -50,
+        symbol: isDog ? '🐶' : '🍗',
+        speed: baseSpeed + (Math.random() * 2), 
+        isDog: isDog
     });
 }
 
@@ -467,44 +472,41 @@ function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. SMOOTH MOVEMENT (Interpolation)
-    // Boka moves 20% of the distance to the target every frame
-    player.x += (player.targetX - player.x) * 0.2;
-    
-    // Bounds check
+    // 1. Smooth Interpolation
+    player.x += (player.targetX - player.x) * 0.25;
     if(player.x < 0) player.x = 0;
     if(player.x > canvas.width - player.w) player.x = canvas.width - player.w;
 
-    // 2. DRAW PLAYER
+    // 2. Draw Boka
     ctx.font = "50px Arial";
-    ctx.textAlign = "left";
     ctx.fillText("😺", player.x, player.y + 45);
 
-    // 3. ITEMS LOGIC
+    // 3. Item Logic
     if (Math.random() < 0.04) spawnItem();
 
-    items.forEach((item, i) => {
-        item.y += item.speed;
+    for (let i = items.length - 1; i >= 0; i--) {
+        let it = items[i];
+        it.y += it.speed;
+        
         ctx.font = "35px Arial";
-        ctx.fillText(item.symbol, item.x, item.y);
+        ctx.fillText(it.symbol, it.x, it.y);
 
-        // Professional Hitbox (Tightened)
-        if (item.y > player.y && item.y < player.y + player.h &&
-            item.x > player.x - 10 && item.x < player.x + player.w - 10) {
+        // Accurate Collision
+        if (it.y > player.y && it.y < player.y + player.h &&
+            it.x > player.x - 15 && it.x < player.x + player.w - 5) {
             
-            if (item.isBad) {
+            if (it.isDog) {
                 endGame();
             } else {
                 score += 10;
                 scoreVal.innerText = score;
+                baseSpeed += 0.05; // Gradually gets faster!
                 items.splice(i, 1);
-                // Mini haptic-like effect: screen flash
-                ctx.fillStyle = "rgba(255,255,255,0.1)";
-                ctx.fillRect(0,0,400,400);
             }
+        } else if (it.y > canvas.height) {
+            items.splice(i, 1);
         }
-        if (item.y > canvas.height) items.splice(i, 1);
-    });
+    }
 
     requestAnimationFrame(update);
 }
@@ -512,12 +514,14 @@ function update() {
 function endGame() {
     gameActive = false;
     gameMenu.style.display = 'flex';
-    document.getElementById('menuStatus').innerText = "Score: " + score;
+    document.getElementById('instructionBox').style.display = 'none';
+    document.getElementById('menuStatus').innerHTML = `<span style="color:#e74c3c">OH NO! 🐶</span><br>Final Score: ${score}`;
+    
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('boka_catch_best', highScore);
         bestVal.innerText = highScore;
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }
 }
     
